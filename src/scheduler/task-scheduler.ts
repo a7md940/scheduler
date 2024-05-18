@@ -29,7 +29,7 @@ export class TaskScheduler {
           `Circular dependency detected while adding task with name=${name} + dependency ${task.name}`
         );
       }
-      const depTree = this.resolve(task.name);
+      const depTree = this._resolve(task.name);
 
       if (
         depTree
@@ -49,7 +49,7 @@ export class TaskScheduler {
 
   scheduleTasks() {
     const tasks = Array.from(this._tasks.keys()).map((name) =>
-      this.resolve(name)
+      this._resolve(name)
     );
 
     const orderedTrees = tasks.sort((a, b) => {
@@ -61,7 +61,7 @@ export class TaskScheduler {
     return Array.from(new Set(Array.from(new Set(orderedTrees.flat())).flat()));
   }
 
-  resolve(name: string): string[][] {
+  private _resolve(name: string): string[][] {
     const task = this._tasks.get(name);
     if (!task) {
       throw new Error(`task ${name} is not scheduled`);
@@ -81,7 +81,7 @@ export class TaskScheduler {
       if (depTask.deps.length === 0) {
         taskTree.push([depTask.name, task.name]);
       } else {
-        taskTree.push(...this.resolve(depTask.name));
+        taskTree.push(...this._resolve(depTask.name));
       }
     });
 
